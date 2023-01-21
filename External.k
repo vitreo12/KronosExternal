@@ -1,7 +1,12 @@
 Import Algorithm
 Import Math
 Import Vector
-Import "/home/francesco/kronos/Extensions.k"
+
+Package Math {
+	NextPow2(x:Real!) {
+		Math:Pow(#2 Ceil(Math:Log(x) / Math:Log(#2)))
+	}
+}
 
 Package Block {
 	Priority = #1
