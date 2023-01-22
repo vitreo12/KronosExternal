@@ -16,21 +16,28 @@ Package Block {
 		Reactive:Resample(sig Clock)
 	}
 
-	Param(key default) {
+	Param(key default min max) {
+		Math:Clamp(
+			Signal(External(key default)
+			min
+			max
+		)
+	}
+
+	Param(key default) #[Extend] {
 		Signal(External(key default))
 	}
 }
 
-Type Buffer(Data Size Frames NumChans SampleRate)
+Type Buffer(Data Size NumChans SampleRate)
 
 Package Buffer {
 	Cons(key maxSize:Constant!) {
 		data = External-Unsafe(key Algorithm:Repeat(Math:NextPow2(maxSize) 0))
 		size = Block:Param(String:Concat(key "_size") 1)
-		frames = Block:Param(String:Concat(key "_frames") 1)
 		numChans = Block:Param(String:Concat(key "_num_chans") 1)
 		sampleRate = Block:Param(String:Concat(key "_sample_rate") 44100)
-		Make(:Buffer data size frames numChans sampleRate)
+		Make(:Buffer data size numChans sampleRate)
 	}
 
 	New(key maxSize:Constant!) {
