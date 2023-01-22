@@ -18,7 +18,7 @@ Package Block {
 
 	Param(key default min max) {
 		Math:Clamp(
-			Signal(External(key default)
+			Signal(External(key default))
 			min
 			max
 		)
