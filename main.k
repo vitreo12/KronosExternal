@@ -8,6 +8,30 @@ Package Math {
 	}
 }
 
+Package String {
+	String?(t) {
+		Equal-Type(Class-Of(t) Class-Of(""))
+	}
+
+	Replace(text:String! find:String! replace:String!) {
+		pos = String:Find(text find)
+		remainder = String:Skip(text pos + String:Length(find))
+		When(pos >= #0
+			String:Concat(String:Take(text pos) replace Recur(remainder find replace))
+		Otherwise
+			text
+		)
+	}
+
+	Convert-Invariant(val:Constant!) {
+		Replace(String:Convert(val) "." "d")
+	}
+}
+
+Constraints:String!(t) #[Pattern] {
+	When(String:String?(t) t)
+}
+
 Package Block {
 	Priority = #1
 	Clock = Reactive:Tick(Priority "block")
@@ -16,23 +40,32 @@ Package Block {
 		Reactive:Resample(sig Clock)
 	}
 
-	Param(key default min max) {
+	Param(key:String!) {
+		keyWithDefault = String:Concat(String:Concat(key "_default") #0)
+		Signal(External(keyWithDefault Coerce(Float #0)))
+	}
+
+	Param(key:String! default:Constant!) #[Extend] {
+		defaultConvert = String:Convert-Invariant(default)
+		keyWithDefault = String:Concat(String:Concat(key "_default") defaultConvert)
+		Signal(External(keyWithDefault Coerce(Float default)))
+	}
+
+	Param(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
+		defaultConvert = String:Convert-Invariant(default)
+		keyWithDefault = String:Concat(String:Concat(key "_default") defaultConvert)
 		Math:Clamp(
-			Signal(External(key default))
+			Signal(External(keyWithDefault Coerce(Float default)))
 			min
 			max
 		)
-	}
-
-	Param(key default) #[Extend] {
-		Signal(External(key default))
 	}
 }
 
 Type Buffer(Data Size Frames NumChans SampleRate)
 
 Package Buffer {
-	Cons(key maxSize:Constant!) {
+	Cons(key:String! maxSize:Constant!) {
 		data = External-Unsafe(key Algorithm:Repeat(Math:NextPow2(maxSize) 0))
 		size = Block:Param(String:Concat(key "_size") 1)
 		frames = Block:Param(String:Concat(key "_frames") 1)
@@ -41,7 +74,7 @@ Package Buffer {
 		Make(:Buffer data size frames numChans sampleRate)
 	}
 
-	New(key maxSize:Constant!) {
+	New(key:String! maxSize:Constant!) {
 		Cons(key maxSize)
 	}
 
