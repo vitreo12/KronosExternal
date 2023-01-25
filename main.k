@@ -74,7 +74,11 @@ Package Buffer {
 		Make(:Buffer data size frames numChans sampleRate)
 	}
 
-	New(key:String! maxSize:Constant!) {
+    New(key:String!) {
+        Cons(key #480000)
+    }
+
+	New(key:String! maxSize:Constant!) #[Extend] {
 		Cons(key maxSize)
 	}
 
