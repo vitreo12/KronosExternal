@@ -62,6 +62,32 @@ Package Block {
 	}
 }
 
+Package Param {
+	New(key:String!) {
+        Block:Param(key)
+	}
+
+	New(key:String! default:Constant!) #[Extend] {
+        Block:Param(key default)
+	}
+
+	New(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
+        Block:Param(key default min max)
+	}
+
+	Param(key:String!) {
+        Block:Param(key)
+	}
+
+	Param(key:String! default:Constant!) #[Extend] {
+        Block:Param(key default)
+	}
+
+	Param(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
+        Block:Param(key default min max)
+	}
+}
+
 Type Buffer(Data Size Frames NumChans SampleRate)
 
 Package Buffer {
@@ -79,6 +105,14 @@ Package Buffer {
     }
 
 	New(key:String! maxSize:Constant!) #[Extend] {
+		Cons(key maxSize)
+	}
+
+    Buffer(key:String!) {
+        Cons(key #480000)
+    }
+
+	Buffer(key:String! maxSize:Constant!) #[Extend] {
 		Cons(key maxSize)
 	}
 
