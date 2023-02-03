@@ -1,4 +1,5 @@
 Import Algorithm
+Import IO
 Import Math
 Import Vector
 
@@ -106,31 +107,31 @@ Package Buffer {
 
 	Read(buf:Buffer! index:Real!) {
 		(data size _ _ _) = Break(:Buffer buf)
-		Select-Wrap(data Math:Clamp(Coerce(Int32 index) #0 size - #1))
+		Audio:Signal(Select-Wrap(data Math:Clamp(Coerce(Int32 index) #0 size - #1)))
 	}
 
 	Read(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size _ numChans _) = Break(:Buffer buf)
-		mcIndex = (Coerce(Int32 index) * numChans) + channel
-		Select-Wrap(data Math:Clamp(mcIndex #0 size - #1))
+		(data size frames numChans _) = Break(:Buffer buf)
+		mcIndex = (Math:Clamp(Coerce(Int32 index) #0 frames - #1) * numChans) + channel
+		Audio:Signal(Select-Wrap(data Math:Clamp(mcIndex #0 size - #1)))
 	}
 
 	ReadLinear(buf:Buffer! index:Real!) {
 		(data size _ _ _) = Break(:Buffer buf)
 		index32 = Coerce(Int32 index)
 		indices = Algorithm:Map(
-			i => Select-Wrap(data Math:Clamp(index32 + i #0 size - #1))
+			i => Audio:Signal(Select-Wrap(data Math:Clamp(index32 + i #0 size - #1)))
 			(#0 #1)
 		)
 		Math:Linear-Interpolation(Fraction(index) indices)
 	}
 
 	ReadLinear(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size _ numChans _) = Break(:Buffer buf)
+		(data size frames numChans _) = Break(:Buffer buf)
 		mcRead  = i => (i * numChans) + channel
-		index32 = Coerce(Int32 index)
+		index32 = Math:Clamp(Coerce(Int32 index) #0 frames - #1)
 		indices = Algorithm:Map(
-			i => Select-Wrap(data Math:Clamp(mcRead(index32 + i) #0 size - #1))
+			i => Audio:Signal(Select-Wrap(data Math:Clamp(mcRead(index32 + i) #0 size - #1)))
 			(#0 #1)
 		)
 		Math:Linear-Interpolation(Fraction(index) indices)
@@ -140,18 +141,18 @@ Package Buffer {
 		(data size _ _ _) = Break(:Buffer buf)
 		index32 = Coerce(Int32 index)
 		indices = Algorithm:Map(
-			i => Select-Wrap(data Math:Clamp(index32 + i #0 size - #1))
+			i => Audio:Signal(Select-Wrap(data Math:Clamp(index32 + i #0 size - #1)))
 			(#-1 #0 #1 #2)
 		)
 		Math:Hermite-Interpolation(Fraction(index) indices)
 	}
 
 	ReadHermite(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size _ numChans _) = Break(:Buffer buf)
+		(data size frames numChans _) = Break(:Buffer buf)
 		mcRead  = i => (i * numChans) + channel
-		index32 = Coerce(Int32 index)
+		index32 = Math:Clamp(Coerce(Int32 index) #0 frames - #1)
 		indices = Algorithm:Map(
-			i => Select-Wrap(data Math:Clamp(mcRead(index32 + i) #0 size - #1))
+			i => Audio:Signal(Select-Wrap(data Math:Clamp(mcRead(index32 + i) #0 size - #1)))
 			(#-1 #0 #1 #2)
 		)
 		Math:Hermite-Interpolation(Fraction(index) indices)
