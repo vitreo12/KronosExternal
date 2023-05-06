@@ -85,16 +85,20 @@ Package Param {
 	}
 }
 
-Type Buffer(Data Size Frames NumChans SampleRate)
+Type Buffer(Data Params)
+Type BufferParams(Size Frames NumChans SampleRate)
 
 Package Buffer {
 	Cons(key:String! maxSize:Constant!) {
-		data = External-Unsafe(String:Concat(key "_buffer") Algorithm:Repeat(Math:NextPow2(maxSize) 0))
-		size = Block:Param(String:Concat(key "_size") #1)
-		frames = Block:Param(String:Concat(key "_frames") #1)
-		numChans = Block:Param(String:Concat(key "_num_chans") #1)
-		sampleRate = Block:Param(String:Concat(key "_sample_rate") #44100)
-		Make(:Buffer data size frames numChans sampleRate)
+		data = External-Unsafe(
+      String:Concat(key "_buffer_data") 
+      Algorithm:Repeat(Math:NextPow2(maxSize) 0)
+    )
+    params = External-Unsafe(
+      String:Concat(key "_buffer_params") 
+      Make(:BufferParams 0 0 0 44100)
+    )
+    Make(:Buffer data params)
 	}
 
   New(key:String!) {
@@ -105,19 +109,38 @@ Package Buffer {
 		Cons(key maxSize)
 	}
 
-	Read(buf:Buffer! index:Real!) {
-		(data size _ _ _) = Break(:Buffer buf)
+  Size(buf:Buffer!) {
+    BufferParams:Size(Buffer:Params(buf))
+  }
+  
+  Frames(buf:Buffer!) {
+    BufferParams:Frames(Buffer:Params(buf))
+  }
+  
+  NumChans(buf:Buffer!) {
+    BufferParams:NumChans(Buffer:Params(buf))
+  }
+
+  SampleRate(buf:Buffer!) {
+    BufferParams:SampleRate(Buffer:Params(buf))
+  }
+	
+  Read(buf:Buffer! index:Real!) {
+    data = Buffer:Data(buf)
+    size = Buffer:Size(buf)
 		Audio:Signal(Select-Wrap(data Math:Clamp(Coerce(Int32 index) #0 size - #1)))
 	}
 
 	Read(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size frames numChans _) = Break(:Buffer buf)
+    data = Buffer:Data(buf)
+    (size frames numChans _) = Break(:BufferParams Buffer:Params(buf))
 		mcIndex = (Math:Clamp(Coerce(Int32 index) #0 frames - #1) * numChans) + channel
 		Audio:Signal(Select-Wrap(data Math:Clamp(mcIndex #0 size - #1)))
 	}
 
 	ReadLinear(buf:Buffer! index:Real!) {
-		(data size _ _ _) = Break(:Buffer buf)
+    data = Buffer:Data(buf)
+    size = Buffer:Size(buf)
 		index32 = Coerce(Int32 index)
 		indices = Algorithm:Map(
 			i => Audio:Signal(Select-Wrap(data Math:Clamp(index32 + i #0 size - #1)))
@@ -127,7 +150,8 @@ Package Buffer {
 	}
 
 	ReadLinear(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size frames numChans _) = Break(:Buffer buf)
+    data = Buffer:Data(buf)
+    (size frames numChans _) = Break(:BufferParams Buffer:Params(buf))
 		mcRead  = i => (i * numChans) + channel
 		index32 = Math:Clamp(Coerce(Int32 index) #0 frames - #1)
 		indices = Algorithm:Map(
@@ -138,7 +162,8 @@ Package Buffer {
 	}
 
 	ReadHermite(buf:Buffer! index:Real!) {
-		(data size _ _ _) = Break(:Buffer buf)
+    data = Buffer:Data(buf)
+    size = Buffer:Size(buf)
 		index32 = Coerce(Int32 index)
 		indices = Algorithm:Map(
 			i => Audio:Signal(Select-Wrap(data Math:Clamp(index32 + i #0 size - #1)))
@@ -148,7 +173,8 @@ Package Buffer {
 	}
 
 	ReadHermite(buf:Buffer! index:Real! channel:Real!) #[Extend] {
-		(data size frames numChans _) = Break(:Buffer buf)
+    data = Buffer:Data(buf)
+    (size frames numChans _) = Break(:BufferParams Buffer:Params(buf))
 		mcRead  = i => (i * numChans) + channel
 		index32 = Math:Clamp(Coerce(Int32 index) #0 frames - #1)
 		indices = Algorithm:Map(
