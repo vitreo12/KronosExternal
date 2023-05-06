@@ -89,7 +89,8 @@ Type Buffer(Data Size Frames NumChans SampleRate)
 
 Package Buffer {
 	Cons(key:String! maxSize:Constant!) {
-		data = External-Unsafe(key Algorithm:Repeat(Math:NextPow2(maxSize) 0))
+    key_buf = String:Concat(key "_buffer")
+		data = External-Unsafe(key_buf Algorithm:Repeat(Math:NextPow2(maxSize) 0))
 		size = Block:Param(String:Concat(key "_size") #1)
 		frames = Block:Param(String:Concat(key "_frames") #1)
 		numChans = Block:Param(String:Concat(key "_num_chans") #1)
