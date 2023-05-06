@@ -73,15 +73,15 @@ Package Block {
 
 Package Param {
 	New(key:String!) {
-        Block:Param(key)
+    Block:Param(key)
 	}
 
 	New(key:String! default:Constant!) #[Extend] {
-        Block:Param(key default)
+    Block:Param(key default)
 	}
 
 	New(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
-        Block:Param(key default min max)
+    Block:Param(key default min max)
 	}
 }
 
@@ -98,7 +98,7 @@ Package Buffer {
 	}
 
   New(key:String!) {
-      Cons(key #48000 * #30)
+    Cons(key #48000 * #30)
   }
 
 	New(key:String! maxSize:Constant!) #[Extend] {
