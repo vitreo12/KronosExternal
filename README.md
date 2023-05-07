@@ -6,7 +6,7 @@ Kronos module to declare inputs and buffers for external code (wrappers)
 - To declare a parameter, use the `Param` package:
 
     ```
-    Import [vitreo12/KronosExternal 0.1]
+    Import [vitreo12/KronosExternal 1.0]
 
     Main() {
         ; Different ways to declare a parameter. p2 also implements min / max ranges.
@@ -20,7 +20,7 @@ Kronos module to declare inputs and buffers for external code (wrappers)
 - To declare a `Buffer`, use the `Buffer` package:
 
     ```
-    Import [vitreo12/KronosExternal 0.1]
+    Import [vitreo12/KronosExternal 1.0]
 
     Main() {
         ; Different ways to declare a Buffer. b2 limits the maximum size to 48000 samples.
