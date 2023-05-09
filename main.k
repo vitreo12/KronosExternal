@@ -15,9 +15,9 @@ Sample-Rate() {
   SampleRate()
 }
 
-;;;;;;;;;;;;;;;;;;
-; Math utilities ;
-;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;
+; Math extensions ;
+;;;;;;;;;;;;;;;;;;;
 
 Package Math {
   NextPow2(x:Real!) {
@@ -25,9 +25,9 @@ Package Math {
   }
 }
 
-;;;;;;;;;;;;;;;
-; String type ;
-;;;;;;;;;;;;;;;
+;;;;;;;;;;
+; String ;
+;;;;;;;;;;
 
 Package String {
   String?(t) {
@@ -53,37 +53,30 @@ Constraints:String!(t) #[Pattern] {
   When(String:String?(t) t)
 }
 
-;;;;;;;;;;;;;;;;
-; Buffer types ;
-;;;;;;;;;;;;;;;;
+;;;;;;;;;
+; Param ;
+;;;;;;;;;
 
-Type Buffer(Data Params)
-Type BufferParams(Size Frames NumChans SampleRate)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Block (Param / BufferParams) ;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Package Block {
+Package Param {
   Priority = #1
-  Clock = Reactive:Tick(Priority "block")
+  Clock = Reactive:Tick(Priority "Params")
 
   Signal(sig) {
     Reactive:Resample(sig Clock)
   }
 
-  Param(key:String!) {
+  New(key:String!) {
     keyWithDefault = String:Concat(String:Concat(key "_default") #0)
     Signal(External(keyWithDefault Coerce(Float #0)))
   }
 
-  Param(key:String! default:Constant!) #[Extend] {
+  New(key:String! default:Constant!) #[Extend] {
     defaultConvert = String:Convert-Invariant(default)
     keyWithDefault = String:Concat(String:Concat(key "_default") defaultConvert)
     Signal(External(keyWithDefault Coerce(Float default)))
   }
 
-  Param(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
+  New(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
     defaultConvert = String:Convert-Invariant(default)
     keyWithDefault = String:Concat(String:Concat(key "_default") defaultConvert)
     Math:Clamp(
@@ -92,28 +85,30 @@ Package Block {
       max
     )
   }
-
-  BufferParams(key:String!) {
-    keyWithExt = String:Concat(key "_buffer_params") 
-    Signal(External(keyWithExt Make(:BufferParams 0 0 0 44100)))
-  }
 }
 
-;;;;;;;;;;;;;;;;;
-; Param (sugar) ;
-;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;
+; Buffer types ;
+;;;;;;;;;;;;;;;;
 
-Package Param {
+Type Buffer(Data Params)
+Type BufferParams(Size Frames NumChans SampleRate)
+
+;;;;;;;;;;;;;;;;
+; BufferParams ;
+;;;;;;;;;;;;;;;;
+
+Package BufferParams {
+  Priority = #1
+  Clock = Reactive:Tick(Priority "BufferParams")
+
+  Signal(sig) {
+    Reactive:Resample(sig Clock)
+  }
+  
   New(key:String!) {
-    Block:Param(key)
-  }
-
-  New(key:String! default:Constant!) #[Extend] {
-    Block:Param(key default)
-  }
-
-  New(key:String! default:Constant! min:Real! max:Real!) #[Extend] {
-    Block:Param(key default min max)
+    keyWithExt = String:Concat(key "_buffer_params") 
+    Signal(External(keyWithExt Make(:BufferParams 0 0 0 44100)))
   }
 }
 
@@ -127,7 +122,7 @@ Package Buffer {
       String:Concat(key "_buffer_data") 
       Algorithm:Repeat(Math:NextPow2(maxSize) 0)
     )
-    params = Block:BufferParams(key)
+    params = BufferParams:New(key)
     Make(:Buffer data params)
   }
 
